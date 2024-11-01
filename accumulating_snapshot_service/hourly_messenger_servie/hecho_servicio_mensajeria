@@ -1,0 +1,45 @@
+import pandas as pd
+import numpy as np
+import yaml
+from sqlalchemy import create_engine
+
+def create_servicio_mensajeria_fact(n_records=1000):
+    return pd.DataFrame({
+        'nit_cliente': np.random.randint(1, 101, n_records),
+        'id_fecha': np.random.randint(1, 366, n_records),
+        'id_tipo_servicio': np.random.randint(1, 5, n_records),
+        'id_ciudad_destino': np.random.randint(1, 21, n_records),
+        'id_ciudad_origen': np.random.randint(1, 21, n_records),
+        'id_sede': np.random.randint(1, 11, n_records),
+        'id_hora': np.random.randint(0, 1440, n_records),
+        'total_finalizados_hora': np.random.randint(0, 10, n_records),
+        # Nuevos campos para análisis
+        'tiempo_entrega_promedio': np.random.uniform(0.5, 72, n_records),
+        'porcentaje_entregas_tiempo': np.random.uniform(0, 100, n_records),
+        'cantidad_intentos_entrega': np.random.randint(1, 4, n_records),
+        'costo_servicio': np.random.uniform(10000, 100000, n_records),
+        'ingresos_servicio': np.random.uniform(15000, 150000, n_records),
+        'margen_servicio': np.random.uniform(0.1, 0.4, n_records),
+        'calificacion_servicio': np.random.uniform(1, 5, n_records),
+        'cantidad_reclamos': np.random.randint(0, 3, n_records),
+        'peso_paquete': np.random.uniform(0.1, 100, n_records),
+        'volumen_paquete': np.random.uniform(0.001, 1, n_records)
+    })
+
+# Crear el DataFrame de servicios de mensajería
+servicio_mensajeria_df = create_servicio_mensajeria_fact()
+
+# Leer configuración de conexión desde un archivo YAML
+with open('../config.yml', 'r') as f:
+    config = yaml.safe_load(f)
+    config_etl = config['bodega']
+
+# Construir la URL de la base de datos
+url_etl = (f"{config_etl['drivername']}://{config_etl['user']}:{config_etl['password']}@{config_etl['host']}:"
+           f"{config_etl['port']}/{config_etl['dbname']}")
+
+# Crear el motor de SQLAlchemy
+etl_conn = create_engine(url_etl)
+
+# Guardar el DataFrame en la base de datos
+servicio_mensajeria_df.to_sql('servicio_mensajeria_fact', etl_conn, if_exists='replace', index_label='key_servicio_mensajeria')
