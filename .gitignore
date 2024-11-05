@@ -1,7 +1,8 @@
 .idea
-*.txt
 config.yml
 *.db
 sources*
 test*
 *.csv
+venv
+__pycache__
