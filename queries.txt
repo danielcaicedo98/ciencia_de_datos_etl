@@ -1,14 +1,31 @@
 7 - Cuál es el tiempo promedio de entrega desde que se solicita el servicio hasta que se cierra el caso
-
+En horas
 SELECT 
-    AVG(tiempo_total) AS tiempo_promedio_entrega
+    AVG(tiempo_total) AS promedio_entrega_horas
 FROM (
     SELECT 
         servicio_id,
-        (tiempo_iniciado_asignado + 
-         tiempo_asignado_recogido + 
-         tiempo_recogido_entregado + 
-         tiempo_entregado_terminado) AS tiempo_total
+        (iniciado_asignado_horas + 
+         asignado_recogido_horas + 
+         recogido_entregado_horas + 
+         entregado_terminado_horas) AS tiempo_total
+    FROM 
+        servicio_accumulating_snapshot
+) AS tiempos
+WHERE 
+    tiempo_total IS NOT NULL;
+
+En dias
+
+SELECT 
+    AVG(tiempo_total) AS promedio_entrega_dias
+FROM (
+    SELECT 
+        servicio_id,
+        (iniciado_asignado_dias + 
+         asignado_recogido_dias + 
+         recogido_entregado_dias + 
+         entregado_terminado_dias) AS tiempo_total
     FROM 
         servicio_accumulating_snapshot
 ) AS tiempos
@@ -18,25 +35,58 @@ WHERE
 
 
 
+
 8 - Mostrar los tiempos de espera por cada fase del servicio: Iniciado, Con mensajero asignado,
 recogido en origen, Entregado en Destino, Cerrado. En que fase del servicio hay más demoras?
 
+En horas
+
 SELECT 
     servicio_id,
-    tiempo_iniciado_asignado AS "espera iniciado asignado(segundos)",
-	tiempo_asignado_recogido AS "espera asignado recogido(segundos)",
-	tiempo_recogido_entregado AS "espera recogido entregado(segundos)",
-	tiempo_entregado_terminado AS "espera terminado entregado(segundos)"
+    iniciado_asignado_horas AS "espera iniciado asignado(horas)",
+	asignado_recogido_horas AS "espera asignado recogido(horas)",
+	recogido_entregado_horas AS "espera recogido entregado(horas)",
+	entregado_terminado_horas AS "espera terminado entregado(horas)"
 FROM 
     servicio_accumulating_snapshot;
 
-8.1 - En que fase del servicio hay más demoras?
+En días
 
 SELECT 
-    AVG(tiempo_iniciado_asignado) AS "promedio iniciado asignado(seeg)",
-	AVG(tiempo_asignado_recogido) AS "promedio asignado recogido(segundos)",
-	AVG(tiempo_recogido_entregado) AS "primedio recogido entregado(segundos)",
-	AVG(tiempo_entregado_terminado) AS "promedio terminado entregado(segundos)"
+    servicio_id,
+    iniciado_asignado_dias AS "espera iniciado asignado(dias)",
+	asignado_recogido_dias AS "espera asignado recogido(dias)",
+	recogido_entregado_dias AS "espera recogido entregado(dias)",
+	entregado_terminado_dias AS "espera terminado entregado(dias)"
 FROM 
     servicio_accumulating_snapshot;
+8.1 - En que fase del servicio hay más demoras?
+
+WITH promedios AS (
+    SELECT
+        'iniciado' AS fase,
+        AVG(iniciado_asignado_horas) AS promedio
+    FROM servicio_accumulating_snapshot
+    UNION ALL
+    SELECT
+        'asignado',
+        AVG(asignado_recogido_horas)
+    FROM servicio_accumulating_snapshot
+    UNION ALL
+    SELECT
+        'recogido',
+        AVG(recogido_entregado_horas)
+    FROM servicio_accumulating_snapshot
+    UNION ALL
+    SELECT
+        'entregado',
+        AVG(entregado_terminado_horas)
+    FROM servicio_accumulating_snapshot
+)
+SELECT
+    fase,
+    promedio
+FROM promedios
+ORDER BY promedio DESC
+LIMIT 1;
 

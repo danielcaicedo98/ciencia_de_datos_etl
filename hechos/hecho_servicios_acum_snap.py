@@ -8,7 +8,7 @@ def extract(source_db):
     # Primero, fusionamos df_agrupado con dim_fecha para obtener las claves de fecha
     dim_servicio = pd.read_sql_table('trans_servicio', source_db)
     dim_fecha = pd.read_sql_table('dim_fecha', source_db)
-    dim_hora = pd.read_sql_table('dim_hora', source_db)
+    # dim_hora = pd.read_sql_table('dim_hora', source_db)
 
     # Merge para cada fecha que necesites
     dim_servicio = pd.merge(dim_servicio, dim_fecha[['date', 'key_dim_fecha']], left_on='fecha_iniciado', right_on='date', how='left')
@@ -34,25 +34,25 @@ def extract(source_db):
 
     # LLAVES PRIMARIAS A DIMENSION HORA
 
-    dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_iniciado', right_on='time', how='left')
-    dim_servicio.drop(columns=['time'], inplace=True)
-    dim_servicio.rename(columns={'key_dim_hora': 'key_hora_iniciado'}, inplace=True)
+    # dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_iniciado', right_on='time', how='left')
+    # dim_servicio.drop(columns=['time'], inplace=True)
+    # dim_servicio.rename(columns={'key_dim_hora': 'key_hora_iniciado'}, inplace=True)
 
-    dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_asignado', right_on='time', how='left')
-    dim_servicio.drop(columns=['time'], inplace=True)
-    dim_servicio.rename(columns={'key_dim_hora': 'key_hora_asignado'}, inplace=True)
+    # dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_asignado', right_on='time', how='left')
+    # dim_servicio.drop(columns=['time'], inplace=True)
+    # dim_servicio.rename(columns={'key_dim_hora': 'key_hora_asignado'}, inplace=True)
 
-    dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_recogido', right_on='time', how='left')
-    dim_servicio.drop(columns=['time'], inplace=True)
-    dim_servicio.rename(columns={'key_dim_hora': 'key_hora_recogido'}, inplace=True)
+    # dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_recogido', right_on='time', how='left')
+    # dim_servicio.drop(columns=['time'], inplace=True)
+    # dim_servicio.rename(columns={'key_dim_hora': 'key_hora_recogido'}, inplace=True)
 
-    dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_entregado', right_on='time', how='left')
-    dim_servicio.drop(columns=['time'], inplace=True)
-    dim_servicio.rename(columns={'key_dim_hora': 'key_hora_entregado'}, inplace=True)
+    # dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_entregado', right_on='time', how='left')
+    # dim_servicio.drop(columns=['time'], inplace=True)
+    # dim_servicio.rename(columns={'key_dim_hora': 'key_hora_entregado'}, inplace=True)
 
-    dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_terminado', right_on='time', how='left')
-    dim_servicio.drop(columns=['time'], inplace=True)
-    dim_servicio.rename(columns={'key_dim_hora': 'key_hora_terminado'}, inplace=True)
+    # dim_servicio = pd.merge(dim_servicio, dim_hora[['time', 'key_dim_hora']], left_on='hora_terminado', right_on='time', how='left')
+    # dim_servicio.drop(columns=['time'], inplace=True)
+    # dim_servicio.rename(columns={'key_dim_hora': 'key_hora_terminado'}, inplace=True)
     return dim_servicio
   
   except Exception as e:
@@ -68,8 +68,9 @@ def transform(dim_servicio):
     dim_servicio['fecha_hora_iniciado'] = dim_servicio['fecha_iniciado'] + dim_servicio['hora_iniciado']
     dim_servicio['fecha_hora_asignado'] = dim_servicio['fecha_asignado'] + dim_servicio['hora_asignado'] 
     dim_servicio['espera_iniciado_asignado'] = dim_servicio['fecha_hora_asignado'] - dim_servicio['fecha_hora_iniciado']
-    dim_servicio['tiempo_iniciado_asignado'] = dim_servicio['espera_iniciado_asignado'].dt.total_seconds()
-
+    dim_servicio['iniciado_asignado_dias'] = dim_servicio['espera_iniciado_asignado'].dt.days
+    dim_servicio['iniciado_asignado_horas'] = dim_servicio['espera_iniciado_asignado'].apply(lambda x: x.total_seconds() / 3600) 
+    dim_servicio['iniciado_asignado_horas'] = dim_servicio['iniciado_asignado_horas'].round(4)
 
 
     # TIEMPO TRANSCURRIDO ENTRE ASIGNADO Y RECOGIDO
@@ -78,7 +79,9 @@ def transform(dim_servicio):
 
     dim_servicio['fecha_hora_recogido'] = dim_servicio['fecha_recogido'] + dim_servicio['hora_recogido'] 
     dim_servicio['espera_asignado_recogido'] = dim_servicio['fecha_hora_recogido'] - dim_servicio['fecha_hora_asignado']
-    dim_servicio['tiempo_asignado_recogido'] = dim_servicio['espera_asignado_recogido'].dt.total_seconds()
+    dim_servicio['asignado_recogido_dias'] = dim_servicio['espera_asignado_recogido'].dt.days
+    dim_servicio['asignado_recogido_horas'] = dim_servicio['espera_asignado_recogido'].apply(lambda x: x.total_seconds() / 3600) 
+    dim_servicio['asignado_recogido_horas'] = dim_servicio['asignado_recogido_horas'].round(4)
 
 
     # TIEMPO TRANSCURRIDO ENTRE RECOGIDO Y ENTREGADO
@@ -87,7 +90,9 @@ def transform(dim_servicio):
 
     dim_servicio['fecha_hora_entregado'] = dim_servicio['fecha_entregado'] + dim_servicio['hora_entregado'] 
     dim_servicio['espera_recogido_entregado'] = dim_servicio['fecha_hora_entregado'] - dim_servicio['fecha_hora_recogido']
-    dim_servicio['tiempo_recogido_entregado'] = dim_servicio['espera_recogido_entregado'].dt.total_seconds()
+    dim_servicio['recogido_entregado_dias'] = dim_servicio['espera_recogido_entregado'].dt.days
+    dim_servicio['recogido_entregado_horas'] = dim_servicio['espera_recogido_entregado'].apply(lambda x: x.total_seconds() / 3600) 
+    dim_servicio['recogido_entregado_horas'] = dim_servicio['recogido_entregado_horas'].round(4)
 
     # TIEMPO TRANSCURRIDO ENTRE RECOGIDO Y ENTREGADO
 
@@ -95,7 +100,9 @@ def transform(dim_servicio):
 
     dim_servicio['fecha_hora_terminado'] = dim_servicio['fecha_terminado'] + dim_servicio['hora_terminado'] 
     dim_servicio['espera_entregado_terminado'] = dim_servicio['fecha_hora_terminado'] - dim_servicio['fecha_hora_entregado']
-    dim_servicio['tiempo_entregado_terminado'] = dim_servicio['espera_entregado_terminado'].dt.total_seconds()
+    dim_servicio['entregado_terminado_dias'] = dim_servicio['espera_entregado_terminado'].dt.days
+    dim_servicio['entregado_terminado_horas'] = dim_servicio['espera_entregado_terminado'].apply(lambda x: x.total_seconds() / 3600) 
+    dim_servicio['entregado_terminado_horas'] = dim_servicio['entregado_terminado_horas'].round(4)
     return dim_servicio
   
   except Exception as e:
@@ -107,9 +114,10 @@ def load(warehouse_db, dim_servicio):
     columnas_a_conservar = [
         "servicio_id", "key_fecha_iniciado", "key_fecha_asignado",
         "key_fecha_recogido", "key_fecha_entregado", "key_fecha_terminado",
-        "key_hora_iniciado", "key_hora_asignado", "key_hora_recogido",
-        "key_hora_entregado", "key_hora_terminado","tiempo_iniciado_asignado",
-        'tiempo_asignado_recogido','tiempo_recogido_entregado','tiempo_entregado_terminado'
+        "iniciado_asignado_horas",'iniciado_asignado_dias',
+        "asignado_recogido_horas",'asignado_recogido_dias',
+        "recogido_entregado_horas",'recogido_entregado_dias',
+        "entregado_terminado_horas",'entregado_terminado_dias',
     ]
 
     # Filtramos las columnas, asegurándonos de que existan

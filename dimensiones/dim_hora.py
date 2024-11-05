@@ -25,13 +25,13 @@ def generate_dim_hora():
     """Genera la dimensión 'hora' con las columnas necesarias."""
     # Crear un rango de tiempo para todo el día, con minutos y segundos
     dim_hora = pd.DataFrame({
-        "time": pd.date_range(start='00:00:00', end='23:59:59', freq='s').time  # Extraer solo la parte de la hora
+        "time": pd.date_range(start='00:00:00', end='23:00:00', freq='h').time  # Extraer solo la parte de la hora
     })
 
     # Extraer atributos del tiempo
     dim_hora["hour_24"] = pd.Series([t.hour for t in dim_hora["time"]])  # Hora en formato 24 horas
-    dim_hora["minute"] = pd.Series([t.minute for t in dim_hora["time"]])  # Minutos
-    dim_hora["second"] = pd.Series([t.second for t in dim_hora["time"]])  # Segundos
+    # dim_hora["minute"] = pd.Series([t.minute for t in dim_hora["time"]])  # Minutos
+    # dim_hora["second"] = pd.Series([t.second for t in dim_hora["time"]])  # Segundos
     dim_hora["period"] = pd.Series([t.strftime('%p') for t in dim_hora["time"]])  # AM/PM
     dim_hora["hour_str"] = pd.Series([t.strftime('%I:%M:%S %p') for t in dim_hora["time"]])  # Hora en formato legible (incluye segundos)
 
@@ -56,3 +56,6 @@ def run_etl_dim_hora(config_path='config.yml'):
     load_to_db(dim_hora, etl_conn)
     
     print("ETL para 'dim_hora' completado exitosamente!")
+    
+if __name__ == "__main__":
+    run_etl_dim_hora()
