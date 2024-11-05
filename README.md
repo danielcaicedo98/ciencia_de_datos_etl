@@ -26,12 +26,7 @@
 
 `pip install -r requirements.txt`
 
-# Execute for each dimension
+# Execute 
 
-`python dim_sede.py`
+`python main.py`
 
-`python dim_ciudad.py`
-
-`python dim_tipo_servicio.py`
-
-`python dim_cliente.py`
