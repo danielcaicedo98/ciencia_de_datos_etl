@@ -1,0 +1,42 @@
+7 - Cuál es el tiempo promedio de entrega desde que se solicita el servicio hasta que se cierra el caso
+
+SELECT 
+    AVG(tiempo_total) AS tiempo_promedio_entrega
+FROM (
+    SELECT 
+        servicio_id,
+        (tiempo_iniciado_asignado + 
+         tiempo_asignado_recogido + 
+         tiempo_recogido_entregado + 
+         tiempo_entregado_terminado) AS tiempo_total
+    FROM 
+        servicio_accumulating_snapshot
+) AS tiempos
+WHERE 
+    tiempo_total IS NOT NULL;
+
+
+
+
+8 - Mostrar los tiempos de espera por cada fase del servicio: Iniciado, Con mensajero asignado,
+recogido en origen, Entregado en Destino, Cerrado. En que fase del servicio hay más demoras?
+
+SELECT 
+    servicio_id,
+    tiempo_iniciado_asignado AS "espera iniciado asignado(segundos)",
+	tiempo_asignado_recogido AS "espera asignado recogido(segundos)",
+	tiempo_recogido_entregado AS "espera recogido entregado(segundos)",
+	tiempo_entregado_terminado AS "espera terminado entregado(segundos)"
+FROM 
+    servicio_accumulating_snapshot;
+
+8.1 - En que fase del servicio hay más demoras?
+
+SELECT 
+    AVG(tiempo_iniciado_asignado) AS "promedio iniciado asignado(seeg)",
+	AVG(tiempo_asignado_recogido) AS "promedio asignado recogido(segundos)",
+	AVG(tiempo_recogido_entregado) AS "primedio recogido entregado(segundos)",
+	AVG(tiempo_entregado_terminado) AS "promedio terminado entregado(segundos)"
+FROM 
+    servicio_accumulating_snapshot;
+
