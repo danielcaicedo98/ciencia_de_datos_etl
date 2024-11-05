@@ -63,6 +63,7 @@ def load_to_db(df_agrupado, etl_conn):
 def run_etl_trans_servicio(config_path='config.yml'):
     """Función principal para ejecutar el proceso ETL de la dimensión servicio."""
     # Cargar la configuración
+    print("CARGANDO TRANSFORMACIÓN DE SERVICIO.............................")
     config = load_config(config_path)
     
     # Crear las conexiones a las bases de datos
