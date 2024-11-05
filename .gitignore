@@ -4,3 +4,5 @@ config.yml
 sources*
 test*
 *.csv
+venv
+__pycache__
