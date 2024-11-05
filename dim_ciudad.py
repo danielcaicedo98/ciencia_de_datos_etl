@@ -1,6 +1,6 @@
 import pandas as pd
 from sqlalchemy import text
-from db_connection import get_database_connections
+from dimensiones.db_connection import get_database_connections
 
 def extract(source_db):
   try:

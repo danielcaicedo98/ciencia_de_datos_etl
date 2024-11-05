@@ -1,76 +1,107 @@
-import datetime
 import pandas as pd
-import yaml
-from sqlalchemy import create_engine
+from sqlalchemy import text
+from dimensiones.db_connection import get_database_connections
 
-def load_config(config_path='config.yml'):
-    """Carga el archivo de configuración."""
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
-    return config
+def extract(source_db):
+  try:
+    query = """
+        SELECT 
+            cl.cliente_id as id_cliente,
+            cl.nit_cliente,
+            cl.nombre,
+            cl.email,
+            cl.direccion,
+            cl.telefono,
+            cl.nombre_contacto,
+            c.nombre as ciudad,
+            t.nombre as tipo_cliente,
+            cl.activo,
+            cl.coordinador_id as id_coordinador,
+            cl.sector
+        FROM cliente cl
+        LEFT JOIN tipo_cliente t ON t.tipo_cliente_id = cl.tipo_cliente_id
+        LEFT JOIN ciudad c ON c.ciudad_id = cl.ciudad_id
+    """
+    
+    data = pd.read_sql(query, source_db)
+    print(f"Data extracted successfully from 'cliente'. Records found: {len(data)}")
+    print(data)
+    return data
+  
+  except Exception as e:
+    print(f"Error extracting data: {str(e)}")
 
-def create_db_connection(config):
-    """Crea las conexiones a las bases de datos usando SQLAlchemy."""
-    config_rf = config['fuente']
-    config_etl = config['bodega']
-    
-    # Construir las URLs de las bases de datos
-    url_rf = (f"{config_rf['drivername']}://{config_rf['user']}:{config_rf['password']}@"
-              f"{config_rf['host']}:{config_rf['port']}/{config_rf['dbname']}")
-    url_etl = (f"{config_etl['drivername']}://{config_etl['user']}:{config_etl['password']}@"
-               f"{config_etl['host']}:{config_etl['port']}/{config_etl['dbname']}")
-    
-    # Crear las conexiones con SQLAlchemy
-    ra_fu = create_engine(url_rf)
-    etl_conn = create_engine(url_etl)
-    
-    return ra_fu, etl_conn
+def transform(data):
+  try:
+    # handling null values
+    if data['nit_cliente'].isnull().any() or data['nombre'].isnull().any() or data['direccion'].isnull().any() or data['telefono'].isnull().any() or data['ciudad'].isnull().any():
+      raise ValueError("Null values ​​were found in critical fields")
 
-def load_data_from_db(engine):
-    """Carga las tablas necesarias desde la base de datos."""
-    df_cliente = pd.read_sql_table("cliente", engine)
-    df_t_cliente = pd.read_sql_table("tipo_cliente", engine)
-    df_t_cliente.rename(columns={'nombre': 'tipo_cliente'}, inplace=True)
+    data['email'] = data['email'].fillna('NO ESPECIFICADO')
+    data['nombre_contacto'] = data['nombre_contacto'].fillna('NO ESPECIFICADO')
+    data['tipo_cliente'] = data['tipo_cliente'].fillna('NO ESPECIFICADO')
+    data['id_coordinador'] = data['id_coordinador'].fillna(0)
+    data['sector'] = data['sector'].fillna('NO ESPECIFICADO')
     
-    return df_cliente, df_t_cliente
+    data['nombre'] = data['nombre'].str.strip().str.upper()
+    data['direccion'] = data['direccion'].str.strip().str.upper()
+    data['nombre_contacto'] = data['nombre_contacto'].str.strip().str.upper()
+    data['ciudad'] = data['ciudad'].str.strip().str.upper()
+    data['tipo_cliente'] = data['tipo_cliente'].str.strip().str.upper()
+    data['sector'] = data['sector'].str.strip().str.upper()
 
-def transform_data(df_cliente, df_t_cliente):
-    """Transforma los datos de las tablas cargadas."""
-    # Merge dataframes
-    dim_cliente = pd.merge(df_cliente, df_t_cliente, left_on='tipo_cliente_id', 
-                           right_on='tipo_cliente_id', how='inner')
-    
-    # Selección de columnas a conservar
-    columnas_a_conservar = [
-        "cliente_id", "nit_cliente", "nombre", "email", "direccion", "sector",
-        "nombre_contacto", "telefono", "ciudad_id", "tipo_cliente", "activo"
-    ]
-    dim_cliente = dim_cliente[columnas_a_conservar].dropna(axis=1, how='all')
-    
-    # Establecer 'cliente_id' como índice
-    dim_cliente.set_index('cliente_id', inplace=True)
-    
-    return dim_cliente
+    print(f"Data transformed successfully from 'cliente'. Records found: {len(data)}")
+    print(data)
+    return data
+  
+  except Exception as e:
+    print(f"Error transforming data: {str(e)}")
 
-def load_to_db(dim_cliente, engine):
-    """Carga los datos transformados en la base de datos."""
-    dim_cliente.to_sql('dim_cliente', con=engine, index_label='cliente_id', if_exists='replace')
 
-def run_etl_dim_cliente(config_path='config.yml'):
-    """Función principal para ejecutar el proceso ETL completo de cliente."""
-    # Cargar la configuración
-    config = load_config(config_path)
+def load(warehouse_db, transformed):
+  try:
+    table_query = text("""
+      CREATE TABLE IF NOT EXISTS dim_cliente (
+        id_cliente INTEGER PRIMARY KEY,
+        nit_cliente VARCHAR(100) NOT NULL,
+        nombre VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL,
+        direccion VARCHAR(100) NOT NULL,
+        telefono VARCHAR(100) NOT NULL,
+        nombre_contacto VARCHAR(100) NOT NULL,
+        ciudad VARCHAR(100) NOT NULL,
+        tipo_cliente VARCHAR(100) NOT NULL,
+        activo BOOL,
+        id_coordinador INTEGER NOT NULL,
+        sector VARCHAR(100) NOT NULL
+      );
+    """)
+          
+    with warehouse_db.connect() as conn:
+        conn.execute(table_query)
     
-    # Crear las conexiones a las bases de datos
-    ra_fu, etl_conn = create_db_connection(config)
-    
-    # Cargar los datos
-    df_cliente, df_t_cliente = load_data_from_db(ra_fu)
-    
-    # Transformar los datos
-    dim_cliente = transform_data(df_cliente, df_t_cliente)
-    
-    # Cargar los datos transformados a la base de datos de destino
-    load_to_db(dim_cliente, etl_conn)
-    
-    print("ETL para 'cliente' completado exitosamente!")
+    transformed.to_sql(
+        'dim_cliente',
+        warehouse_db,
+        if_exists='replace',
+        index=False,
+        method='multi'
+    )
+  except Exception as e:
+    print(f"Error loading data: {str(e)}")
+
+def run_etl_dim_cliente():
+  #get databases connections
+  source_db, warehouse_db = get_database_connections()
+  
+  # extract the data
+  data = extract(source_db)
+
+  # transform data
+  transformed = transform(data)
+
+  # load to the warehouse
+  load(warehouse_db, transformed)
+
+if __name__ == "__main__":
+    run_etl_dim_cliente()
