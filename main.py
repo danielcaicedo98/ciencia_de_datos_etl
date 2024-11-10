@@ -8,6 +8,7 @@ from dimensiones.dim_tipo_servicio import run_etl_dim_tipo_servicio
 from dimensiones.dim_sede import run_etl_dim_sede
 from hechos.hecho_servicios_acum_snap import run_etl_servicio_acumulado
 from hechos.hecho_servicio_mensajeria_hora import run_etl_servicio_mensajeria_hora
+from hechos.hecho_novedad import run_etl_novedad_agrupada
 
 def main():
     
@@ -24,6 +25,7 @@ def main():
     """ETL hechos"""    
     run_etl_servicio_acumulado()
     run_etl_servicio_mensajeria_hora()
+    run_etl_novedad_agrupada()
 
 if __name__ == "__main__":
     main()
