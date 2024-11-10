@@ -12,8 +12,6 @@ ORDER BY
     promedio_conteo DESC
 LIMIT 1;
 
-
-
 7 - Cuál es el tiempo promedio de entrega desde que se solicita el servicio hasta que se cierra el caso
 En horas
 SELECT 

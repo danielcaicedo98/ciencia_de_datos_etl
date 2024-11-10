@@ -12,17 +12,17 @@ from hechos.hecho_servicio_mensajeria_hora import run_etl_servicio_mensajeria_ho
 def main():
     
     """ETL dimensiones"""
-    # run_etl_dim_hora()
-    # run_etl_dim_ciudad()
-    # run_etl_dim_cliente()
-    # run_etl_dim_fecha()
-    # run_etl_dim_mensajero()
-    # run_etl_dim_tipo_servicio()
-    # run_etl_dim_sede()
-    # run_etl_trans_servicio()
+    run_etl_dim_hora()
+    run_etl_dim_ciudad()
+    run_etl_dim_cliente()
+    run_etl_dim_fecha()
+    run_etl_dim_mensajero()
+    run_etl_dim_tipo_servicio()
+    run_etl_dim_sede()
+    run_etl_trans_servicio()
     
-    # """ETL hechos"""    
-    # run_etl_servicio_acumulado()
+    """ETL hechos"""    
+    run_etl_servicio_acumulado()
     run_etl_servicio_mensajeria_hora()
 
 if __name__ == "__main__":
