@@ -5,4 +5,4 @@ sources*
 test*
 *.csv
 venv
-__pycache__
+__pycache__*
