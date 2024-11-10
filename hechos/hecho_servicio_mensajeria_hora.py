@@ -70,7 +70,7 @@ def process_hourly_service_counts(df_trans_servicio, dim_fecha, dim_hora):
     df_hourly_counts.drop(columns=['time'], inplace=True)
     
     # Reorganizar columnas
-    df_hourly_counts = df_hourly_counts[['id' , 'key_dim_fecha', 'key_dim_hora','fecha_hora', 'conteo_servicios']]
+    df_hourly_counts = df_hourly_counts[['id' , 'key_dim_fecha', 'key_dim_hora','fecha', 'hora','conteo_servicios']]
     
     return df_hourly_counts
 

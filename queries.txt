@@ -1,3 +1,19 @@
+3 - A qué hora los mensajeros están más ocupados.
+
+SELECT 
+    csh.key_dim_hora,
+    csh.hora,
+    AVG(csh.conteo_servicios) AS promedio_conteo
+FROM 
+    conteo_servicios_por_hora csh
+GROUP BY 
+    csh.key_dim_hora, csh.hora
+ORDER BY 
+    promedio_conteo DESC
+LIMIT 1;
+
+
+
 7 - Cuál es el tiempo promedio de entrega desde que se solicita el servicio hasta que se cierra el caso
 En horas
 SELECT 
