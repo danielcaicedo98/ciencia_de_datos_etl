@@ -45,7 +45,7 @@ def load(transformed, warehouse_db):
   try:
     table_query = text("""
       CREATE TABLE IF NOT EXISTS servicio_mensajeria_diario (
-        id_cliente INTEGER PRIMARY KEY,
+        id_cliente INTEGER,
         id_fecha INTEGER NOT NULL,
         id_tipo_servicio INTEGER NOT NULL,
         id_ciudad_destino INTEGER NOT NULL,
@@ -63,7 +63,7 @@ def load(transformed, warehouse_db):
         'servicio_mensajeria_diario',
         warehouse_db,
         if_exists='replace',
-        index=False,
+        index_label='id',
         method='multi'
     )
   except Exception as e:
