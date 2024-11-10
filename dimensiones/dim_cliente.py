@@ -25,7 +25,6 @@ def extract(source_db):
     
     data = pd.read_sql(query, source_db)
     print(f"Data extracted successfully from 'cliente'. Records found: {len(data)}")
-    print(data)
     return data
   
   except Exception as e:
@@ -51,7 +50,6 @@ def transform(data):
     data['sector'] = data['sector'].str.strip().str.upper()
 
     print(f"Data transformed successfully from 'cliente'. Records found: {len(data)}")
-    print(data)
     return data
   
   except Exception as e:
