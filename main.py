@@ -8,7 +8,7 @@ from dimensiones.dim_tipo_servicio import run_etl_dim_tipo_servicio
 from dimensiones.dim_sede import run_etl_dim_sede
 from hechos.hecho_servicios_acum_snap import run_etl_servicio_acumulado
 from hechos.hecho_servicio_mensajeria_hora import run_etl_servicio_mensajeria_hora
-from hechos.hecho_novedad import run_etl_novedad_agrupada
+from hechos.hecho_novedad import run_etl_hecho_novedad
 from dimensiones.trans_novedad import run_etl_trans_novedad
 from hechos.hecho_servicio_mensajeria_diario import run_etl_servicio_mensajeria_diario
 
@@ -29,7 +29,7 @@ def main():
     """ETL hechos"""    
     run_etl_servicio_acumulado()
     run_etl_servicio_mensajeria_hora()    
-    run_etl_novedad_agrupada()   
+    run_etl_hecho_novedad() 
     run_etl_servicio_mensajeria_diario()
 
 

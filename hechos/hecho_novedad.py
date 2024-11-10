@@ -43,7 +43,7 @@ def load(warehouse_db, novedades_diarias):
     except Exception as e:
         print(f"Error loading data: {str(e)}")
 
-def run_etl_novedad_agrupada():
+def run_etl_hecho_novedad():
     # Conexión a las bases de datos origen y destino
     source_db, warehouse_db = get_database_connections()
     
@@ -57,4 +57,4 @@ def run_etl_novedad_agrupada():
     load(warehouse_db, transformed)
 
 if __name__ == "__main__":
-    run_etl_novedad_agrupada()
+    run_etl_hecho_novedad()

@@ -68,6 +68,7 @@ def run_etl_trans_servicio(config_path='config.yml'):
     
     # Crear las conexiones a las bases de datos
     ra_fu, etl_conn = create_db_connection(config)
+    print("ESTE PROCESO PUEDE TARDAR UN POCO.............................")
     
     # Cargar los datos desde la base de datos
     df_estado_servicio = load_data_from_db(ra_fu)
