@@ -13,21 +13,23 @@ from dimensiones.trans_novedad import run_etl_trans_novedad
 
 def main():
     
-    # """ETL dimensiones"""
-    # run_etl_dim_hora()
-    # run_etl_dim_ciudad()
-    # run_etl_dim_cliente()
-    # run_etl_dim_fecha()
-    # run_etl_dim_mensajero()
-    # run_etl_dim_tipo_servicio()
-    # run_etl_dim_sede()
-    # run_etl_trans_servicio()
+    """ETL dimensiones"""
+    run_etl_dim_hora()
+    run_etl_dim_ciudad()
+    run_etl_dim_cliente()
+    run_etl_dim_fecha()
+    run_etl_dim_mensajero()
+    run_etl_dim_tipo_servicio()
+    run_etl_dim_sede()
+    run_etl_trans_servicio()
+    run_etl_trans_novedad()
     
-    # """ETL hechos"""    
-    # run_etl_servicio_acumulado()
-    # run_etl_servicio_mensajeria_hora()
+    """ETL hechos"""    
+    run_etl_servicio_acumulado()
+    run_etl_servicio_mensajeria_hora()
+    
     run_etl_novedad_agrupada()
-    # run_etl_trans_novedad()
+    
 
 if __name__ == "__main__":
     main()
