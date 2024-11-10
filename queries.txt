@@ -1,3 +1,17 @@
+3 - A qué hora los mensajeros están más ocupados.
+
+SELECT 
+    csh.key_dim_hora,
+    csh.hora,
+    AVG(csh.conteo_servicios) AS promedio_conteo
+FROM 
+    conteo_servicios_por_hora csh
+GROUP BY 
+    csh.key_dim_hora, csh.hora
+ORDER BY 
+    promedio_conteo DESC
+LIMIT 1;
+
 7 - Cuál es el tiempo promedio de entrega desde que se solicita el servicio hasta que se cierra el caso
 En horas
 SELECT 
@@ -89,4 +103,81 @@ SELECT
 FROM promedios
 ORDER BY promedio DESC
 LIMIT 1;
+
+9 - Cuáles son las novedades que más se presentan durante la prestación del servicio?
+
+9.1 - Por día
+
+SELECT
+    tipo_novedad_id,
+    nombre,
+    promedio_diario
+FROM (
+    SELECT
+        tipo_novedad_id,
+        nombre,
+        AVG(novedades_dia) AS promedio_diario
+    FROM
+        hecho_novedad
+    WHERE
+        tipo_novedad_id IN (1, 2)
+    GROUP BY
+        tipo_novedad_id,
+        nombre
+    ORDER BY
+        promedio_diario DESC
+    LIMIT 1  
+) AS max_promedio;
+
+9.2 - Por mes
+
+SELECT
+    tipo_novedad_id,
+    nombre,
+    promedio_mensual
+FROM (
+    SELECT
+        tipo_novedad_id,
+        nombre,
+        EXTRACT(YEAR FROM fecha) AS anio,
+        EXTRACT(MONTH FROM fecha) AS mes,
+        AVG(novedades_dia) AS promedio_mensual
+    FROM
+        hecho_novedad
+    WHERE
+        tipo_novedad_id IN (1, 2)
+    GROUP BY
+        tipo_novedad_id,
+        nombre,
+        anio,
+        mes
+    ORDER BY
+        promedio_mensual DESC
+    LIMIT 1 
+) AS max_promedio_mensual;
+
+9.3 - Por año
+
+SELECT
+    tipo_novedad_id,
+    nombre,
+    promedio_anual
+FROM (
+    SELECT
+        tipo_novedad_id,
+        nombre,
+        EXTRACT(YEAR FROM fecha) AS anio,  -- Extrae el año de la fecha
+        AVG(novedades_dia) AS promedio_anual
+    FROM
+        hecho_novedad
+    WHERE
+        tipo_novedad_id IN (1, 2)
+    GROUP BY
+        tipo_novedad_id,
+        nombre,
+        anio
+    ORDER BY
+        promedio_anual DESC
+    LIMIT 1  
+) AS max_promedio_anual;
 
