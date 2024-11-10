@@ -118,7 +118,7 @@ FROM (
         nombre,
         AVG(novedades_dia) AS promedio_diario
     FROM
-        novedad_diaria
+        hecho_novedad
     WHERE
         tipo_novedad_id IN (1, 2)
     GROUP BY
@@ -143,7 +143,7 @@ FROM (
         EXTRACT(MONTH FROM fecha) AS mes,
         AVG(novedades_dia) AS promedio_mensual
     FROM
-        novedad_diaria
+        hecho_novedad
     WHERE
         tipo_novedad_id IN (1, 2)
     GROUP BY
@@ -169,7 +169,7 @@ FROM (
         EXTRACT(YEAR FROM fecha) AS anio,  -- Extrae el año de la fecha
         AVG(novedades_dia) AS promedio_anual
     FROM
-        novedad_diaria
+        hecho_novedad
     WHERE
         tipo_novedad_id IN (1, 2)
     GROUP BY

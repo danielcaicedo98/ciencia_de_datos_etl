@@ -38,7 +38,7 @@ def transform(trans_novedad,dim_fecha):
 def load(warehouse_db, novedades_diarias):
     try:
         # Carga las novedades diarias en una nueva tabla `novedad_diaria` en el Data Warehouse
-        novedades_diarias.to_sql('novedad_diaria', con=warehouse_db, if_exists='replace', index=False)
+        novedades_diarias.to_sql('hecho_novedad', con=warehouse_db, if_exists='replace', index=False)
     
     except Exception as e:
         print(f"Error loading data: {str(e)}")
