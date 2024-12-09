@@ -13,6 +13,7 @@ from dimensiones.trans_novedad import run_etl_trans_novedad
 from hechos.hecho_servicio_mensajeria_diario import run_etl_servicio_mensajeria_diario
 
 
+
 def main():
     
     """ETL dimensiones"""

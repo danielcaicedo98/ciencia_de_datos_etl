@@ -2,14 +2,17 @@ from datetime import  timedelta
 import pandas as pd
 from sqlalchemy import text
 from dimensiones.db_connection import get_database_connections
-
+# 26950
 def extract(source_db):
   try:
     # Primero, fusionamos df_agrupado con dim_fecha para obtener las claves de fecha
     dim_servicio = pd.read_sql_table('trans_servicio', source_db)
-    dim_fecha = pd.read_sql_table('dim_fecha', source_db)
+    dim_fecha = pd.read_sql_table('dim_fecha', source_db)    
+   
+    # dim_servicio.to_sql('test', con=source_db, if_exists='replace', index=False)    
+    # print("TAMANIO DEL DATAFRAME: ",dim_servicio.shape[0])
 
-    # Merge para cada fecha que necesites
+    # Merge para cada fecha 
     dim_servicio = pd.merge(dim_servicio, dim_fecha[['date', 'key_dim_fecha']], left_on='fecha_iniciado', right_on='date', how='left')
     dim_servicio.drop(columns=['date'], inplace=True)
     dim_servicio.rename(columns={'key_dim_fecha': 'key_fecha_iniciado'}, inplace=True)
@@ -95,7 +98,7 @@ def load(warehouse_db, dim_servicio):
         "asignado_recogido_horas",'asignado_recogido_dias',
         "recogido_entregado_horas",'recogido_entregado_dias',
         "entregado_terminado_horas",'entregado_terminado_dias',
-    ]
+    ]    
 
     # Filtramos las columnas, asegurándonos de que existan
     dim_servicio = dim_servicio[columnas_a_conservar].dropna(axis=1, how='all')

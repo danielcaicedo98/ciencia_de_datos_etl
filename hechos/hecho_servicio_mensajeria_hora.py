@@ -40,6 +40,7 @@ def process_hourly_service_counts(df_trans_servicio, dim_fecha, dim_hora):
     df_trans_servicio['fecha_hora_entregado'] = (df_trans_servicio['fecha_entregado'] + df_trans_servicio['hora_entregado']).dt.floor('h')
     
     # Crear una lista de intervalos horarios en el rango de fechas
+    # Para saber en qué horas el mensajero esta ocupado
     all_intervals = []
     for _, row in df_trans_servicio.iterrows():
         current_time = row['fecha_hora_asignado']

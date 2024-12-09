@@ -51,12 +51,19 @@ def process_data(df_estado_servicio):
                        fecha_terminado=('fecha', lambda x: x[df_estado_servicio['estado_id'] == 6].values[0] if not x[df_estado_servicio['estado_id'] == 6].empty else None)
                    )
                    .reset_index())
-    
+    print("TAMANIO DEL DATAFRAME: ",df_agrupado.shape[0])
     df_agrupado.columns.name = None  # Quitar el nombre de las columnas
-    df_agrupado = df_agrupado.dropna()  # Eliminar las filas con valores nulos
+    # df_agrupado = df_agrupado.dropna()
+    # print("TAMANIO DEL DATAFRAME: ",df_agrupado.shape[0])
     return df_agrupado
 
 def load_to_db(df_agrupado, etl_conn):
+   
+    df_agrupado = df_agrupado.dropna(subset=['fecha_recogido','fecha_iniciado','fecha_asignado','fecha_entregado'])
+    df_agrupado['fecha_terminado'] = df_agrupado['fecha_terminado'].fillna(df_agrupado['fecha_entregado'])
+    
+    df_agrupado = df_agrupado.dropna(subset=['hora_recogido','hora_iniciado','hora_asignado','hora_entregado'])
+    df_agrupado['hora_terminado'] = df_agrupado['hora_terminado'].fillna(df_agrupado['hora_entregado'])
     """Carga el DataFrame procesado en la base de datos de destino."""
     df_agrupado.to_sql('trans_servicio', etl_conn, if_exists='replace', index_label='key_servicio')
 
