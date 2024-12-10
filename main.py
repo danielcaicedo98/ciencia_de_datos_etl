@@ -11,7 +11,7 @@ from hechos.hecho_servicio_mensajeria_hora import run_etl_servicio_mensajeria_ho
 from hechos.hecho_novedad import run_etl_hecho_novedad
 from dimensiones.trans_novedad import run_etl_trans_novedad
 from hechos.hecho_servicio_mensajeria_diario import run_etl_servicio_mensajeria_diario
-
+from hechos.hecho_mensajeria_diario import run_etl_mensajeria_diario
 
 
 def main():
@@ -30,8 +30,8 @@ def main():
     """ETL hechos"""    
     run_etl_servicio_acumulado()
     run_etl_servicio_mensajeria_hora()    
-    run_etl_hecho_novedad() 
-    run_etl_servicio_mensajeria_diario()
+    run_etl_hecho_novedad()     
+    run_etl_mensajeria_diario()
 
 
 if __name__ == "__main__":

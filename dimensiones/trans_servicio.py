@@ -29,14 +29,42 @@ def create_db_connection(config):
 
 def load_data_from_db(ra_fu):
     """Carga los datos desde la base de datos de la fuente (mensajeria_estadosservicio)."""
-    df_estado_servicio = pd.read_sql_table('mensajeria_estadosservicio', ra_fu)
+    servicio_estado = pd.read_sql_table('mensajeria_estadosservicio', ra_fu)
+    servicio = pd.read_sql_table('mensajeria_servicio', ra_fu)
+    usuario = pd.read_sql_table('clientes_usuarioaquitoy', ra_fu)
+    
+    
+    usuario.rename(columns={'id': 'id_usuario'}, inplace=True) 
+    
+    columnas_usuario = [
+        'id_usuario', 'sede_id'
+    ]    
+    usuario = usuario[columnas_usuario].dropna(axis=1, how='all') 
+    
+       
+    servicio.rename(columns={'id': 'id_servicio'}, inplace=True)
+    
+    df_estado_servicio = pd.merge(servicio_estado, servicio, left_on='servicio_id', right_on='id_servicio', how='left')
+    df_estado_servicio.drop(columns=['id_servicio'], inplace=True)
+    
+    df_estado_servicio = pd.merge(df_estado_servicio, usuario, left_on='usuario_id', right_on='id_usuario', how='left')
+    df_estado_servicio.drop(columns=['id_usuario'], inplace=True)
+    
+    columnas_a_conservar = [
+        "id", "fecha", "hora", "estado_id",
+        "servicio_id", "cliente_id", "mensajero_id","sede_id"        
+    ]    
+    # Filtramos las columnas, asegurándonos de que existan
+    df_estado_servicio = df_estado_servicio[columnas_a_conservar].dropna(axis=1, how='all')
+    
+    # df_estado_servicio.to_sql('test_dos', ra_fu, if_exists='replace', index_label='key_servicio')
     return df_estado_servicio
 
 def process_data(df_estado_servicio):
     """Procesa los datos para obtener el estado del servicio."""
     # Agrupar los datos y calcular las columnas según el estado_id
     df_agrupado = (df_estado_servicio
-                   .groupby('servicio_id')
+                   .groupby(['servicio_id','cliente_id','mensajero_id','sede_id'])
                    .agg(
                        hora_iniciado=('hora', lambda x: x[df_estado_servicio['estado_id'] == 1].values[0] if not x[df_estado_servicio['estado_id'] == 1].empty else None),
                        hora_asignado=('hora', lambda x: x[df_estado_servicio['estado_id'] == 2].values[0] if not x[df_estado_servicio['estado_id'] == 2].empty else None),
@@ -52,18 +80,17 @@ def process_data(df_estado_servicio):
                    )
                    .reset_index())
     print("TAMANIO DEL DATAFRAME: ",df_agrupado.shape[0])
-    df_agrupado.columns.name = None  # Quitar el nombre de las columnas
-    # df_agrupado = df_agrupado.dropna()
-    # print("TAMANIO DEL DATAFRAME: ",df_agrupado.shape[0])
-    return df_agrupado
-
-def load_to_db(df_agrupado, etl_conn):
-   
+    print(df_agrupado.head(10))
+    df_agrupado.columns.name = None  # Quitar el nombre de las columnas    
     df_agrupado = df_agrupado.dropna(subset=['fecha_recogido','fecha_iniciado','fecha_asignado','fecha_entregado'])
     df_agrupado['fecha_terminado'] = df_agrupado['fecha_terminado'].fillna(df_agrupado['fecha_entregado'])
     
     df_agrupado = df_agrupado.dropna(subset=['hora_recogido','hora_iniciado','hora_asignado','hora_entregado'])
     df_agrupado['hora_terminado'] = df_agrupado['hora_terminado'].fillna(df_agrupado['hora_entregado'])
+    return df_agrupado
+
+def load_to_db(df_agrupado, etl_conn):  
+   
     """Carga el DataFrame procesado en la base de datos de destino."""
     df_agrupado.to_sql('trans_servicio', etl_conn, if_exists='replace', index_label='key_servicio')
 
