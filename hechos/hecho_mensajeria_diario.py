@@ -90,7 +90,7 @@ def load(transformed, warehouse_db):
         
 def run_etl_mensajeria_diario():
   #get databases connections
-  warehouse_db = get_database_connections()
+  source_db, warehouse_db = get_database_connections()
   
   # extract the data
   data = extract(warehouse_db)
