@@ -1,7 +1,10 @@
 # ETL Rapidos y Furiosos
 Universidad del Valle
+
 Escuela de Ingeniería de Sistemas
+
 Introducción a la Ciencia de Datos
+
 Proyecto del Curso
 
 ## Descripción del Proyecto
