@@ -12,12 +12,12 @@ La iniciativa busca resolver retos asociados al crecimiento del negocio, como la
 ## Objetivos del Sistema
 El sistema se centra en el diseño e implementación de una bodega de datos y un módulo de análisis para responder preguntas clave del negocio, tales como:
 
-¿En qué meses del año se solicitan más servicios?
-¿Cuáles son los días y horarios con mayor carga de trabajo?
-¿Qué clientes y sedes generan más solicitudes?
-¿Qué mensajeros son los más eficientes?
-¿Cuál es el tiempo promedio de entrega y en qué fases del servicio hay más demoras?
-¿Cuáles son las novedades más comunes que afectan el flujo de trabajo?
+- ¿En qué meses del año se solicitan más servicios?
+- ¿Cuáles son los días y horarios con mayor carga de trabajo?
+- ¿Qué clientes y sedes generan más solicitudes?
+- ¿Qué mensajeros son los más eficientes?
+- ¿Cuál es el tiempo promedio de entrega y en qué fases del servicio hay más demoras?
+- ¿Cuáles son las novedades más comunes que afectan el flujo de trabajo?
 
 ## Linux requirements
 - python 3.10.12
